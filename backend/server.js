@@ -7,12 +7,26 @@ require("dotenv").config();
 const Booking = require("./models/Booking");
 
 const app = express();
-app.use(cors());
+
+// Middleware
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "*", // Allow requests from the frontend URL
+    methods: ["GET", "POST", "DELETE"],
+  })
+);
 app.use(bodyParser.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.connection.once("open", () => console.log("Connected to MongoDB"));
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+// Root Endpoint
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully!");
+});
 
 // API Endpoints
 app.post("/api/create-booking", async (req, res) => {
@@ -46,6 +60,6 @@ app.delete("/api/delete-booking/:id", async (req, res) => {
   }
 });
 
-// Start the server
+// Start the Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
